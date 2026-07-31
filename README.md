@@ -30,6 +30,31 @@
 
 ---
 
+## 版本管理
+
+本扩展已纳入 Git 版本管理，并在插件界面内提供版本信息区块。
+
+### 仓库与提交
+
+- 扩展目录 `qbank-browser-extension/` 已初始化为 Git 仓库。
+- `version.json` 为**版本真相源**（当前版本、发布日期、更新日志、可选 `updateUrl` / `repository`）。
+- 建议每次发版时：① 同步修改 `manifest.json` 的 `version` 与 `version.json` 的 `version`；② `git commit` 打里程碑；③（`git tag vX.Y.Z`）方便回溯。
+
+### 插件内版本信息
+
+主界面顶部「版本信息」卡片展示：
+
+- **当前版本**：取自 `manifest.json` 的 `version`。
+- **发布日期 / 更新日志**：取自 `version.json`。
+- **检查更新**：点「检查更新」按钮。
+  - 若 `version.json` 中配置了 `updateUrl`（指向远程 `version.json`），会自动拉取并比对语义化版本号，提示是否有新版本。
+  - 未配置 `updateUrl` 时，按钮会提示「请在 version.json 填入 updateUrl」。
+  - 若配置了 `repository`，卡片显示「查看仓库」链接，可跳转查看 releases / 源码。
+
+> 修改版本号后，需在扩展管理页「重新加载」扩展使 `manifest.json` 生效。
+
+---
+
 ## 使用步骤（四步）
 
 1. **填题库参数**（见下「参数输入说明」）
