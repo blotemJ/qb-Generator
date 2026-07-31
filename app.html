@@ -51,6 +51,22 @@
       </div>
     </section>
 
+    <!-- ===== 版本信息 ===== -->
+    <section class="card version-card" id="versionCard">
+      <h2>版本信息</h2>
+      <div class="version-row">
+        <span class="version-label">当前版本</span>
+        <b id="curVersion">-</b>
+        <span class="version-date" id="curVersionDate"></span>
+      </div>
+      <div class="version-log" id="versionLog"></div>
+      <div class="actions">
+        <button id="checkUpdate" class="btn ghost">检查更新</button>
+        <a id="repoLink" class="btn ghost hidden" href="#" target="_blank" rel="noopener">查看仓库</a>
+        <span id="updateResult" class="test-result"></span>
+      </div>
+    </section>
+
     <!-- ===== 使用说明 ===== -->
     <details class="guide-card">
       <summary>📖 使用说明（点击展开）</summary>
@@ -209,5 +225,6 @@
 
   <script src="vip.js"></script>
   <script src="popup.js"></script>
+  <script src="version.js"></script>
 </body>
 </html>

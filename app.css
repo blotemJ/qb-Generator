@@ -115,6 +115,17 @@ body {
 }
 .free-limit.hidden { display: none; }
 
+/* ===== 版本信息卡片 ===== */
+.version-card .version-row { display: flex; align-items: baseline; gap: 10px; font-size: 16px; }
+.version-card .version-label { color: var(--muted); font-size: 14px; }
+.version-card .version-date { color: var(--muted); font-size: 13px; }
+.version-card .version-log {
+  margin: 10px 0 4px; padding: 10px 12px; font-size: 13px; line-height: 1.6;
+  background: var(--bg); border-radius: 8px; color: var(--text);
+}
+.test-result.ok { color: var(--ok); }
+.test-result.err { color: var(--danger); }
+
 /* ===== 参考文档列表 ===== */
 .ref-doc-list { margin: 10px 0; }
 .ref-doc-item {
