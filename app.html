@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <title>陆小马刷题题库生成器</title>
+  <link rel="stylesheet" href="app.css" />
+</head>
+<body>
+  <header class="app-header">
+    <div class="logo">题</div>
+    <div>
+      <h1>陆小马刷题题库生成器</h1>
+      <p class="subtitle">批量生成高频易错题库 · 保存到本地 · 独立页面运行</p>
+    </div>
+    <div class="header-status">
+      <span class="vip-badge" id="vipBadge">未激活</span>
+      <span class="dot" id="statusDot"></span>
+      <span id="statusText">空闲</span>
+    </div>
+  </header>
+
+  <main class="app-main">
+    <!-- ===== VIP 卡密认证 ===== -->
+    <section class="card vip-card" id="vipCard">
+      <h2>VIP 卡密认证</h2>
+      <div id="vipNotice" class="vip-notice hidden"></div>
+      <div id="vipActiveBox" class="vip-active hidden">
+        <div class="vip-active-row">
+          <span class="vip-check">✓</span>
+          <span>已激活 VIP，全部功能已解锁</span>
+        </div>
+        <div class="vip-meta">
+          <span>卡密：<b id="vipKami"></b></span>
+          <span>到期：<b id="vipExpire"></b></span>
+        </div>
+        <div class="actions">
+          <button id="vipUnbind" class="btn ghost">解绑本机</button>
+        </div>
+      </div>
+      <div id="vipInactiveBox">
+        <p class="hint">免费版：总题数上限 <b>30</b>、不支持多考试并行。激活卡密后解锁：无限题量、自定义难度分级高级策略、批量并行生成、云端模板等。</p>
+        <div class="grid vip-input-row">
+          <label class="span2">激活码（卡密）
+            <input id="vipKamiInput" type="text" placeholder="请输入鸽子云卡密，如 2iPMrvyhqH" />
+          </label>
+        </div>
+        <div class="actions">
+          <button id="vipActivate" class="btn primary">激活 VIP</button>
+          <span id="vipResult" class="test-result"></span>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===== 使用说明 ===== -->
+    <details class="guide-card">
+      <summary>📖 使用说明（点击展开）</summary>
+      <div class="guide-body">
+        <p class="guide-title">① 题库参数</p>
+        <ul>
+          <li><b>考试名称</b>：必填，目标考试/科目。</li>
+          <li><b>总题数 ÷ 每批题数 = 批次数</b>，批次数即要生成的 TXT 文件数。</li>
+          <li>例：总题数 900、每批 150 → 6 批，生成 6 个文件。</li>
+          <li><b>时政下限</b>：涉及时政/热点的题，事件日期不得早于此值。</li>
+        </ul>
+        <p class="guide-title">② 参考文档（出题知识库）</p>
+        <ul>
+          <li>上传 <b>.txt / .md</b> 文件作为出题依据，模型优先依据其内容出题。</li>
+          <li>支持多文件，单文件过大自动截断；内容只在本页内存使用，不上传第三方。</li>
+        </ul>
+        <p class="guide-title">③ 大模型 API</p>
+        <ul>
+          <li>Base URL 填服务商接口（以 /v1 结尾），模型名填该服务商存在的模型。</li>
+          <li>API Key 必须纯英文/数字，不能含中文、换行、全角。</li>
+          <li>本地 Ollama：Base URL=<code>http://localhost:11434/v1</code>，模型名用 <code>ollama list</code> 里的，API Key 随便填非空。</li>
+        </ul>
+        <p class="guide-title">④ 模块规划</p>
+        <ul>
+          <li>每批 1 行，格式：<code>模块名 | 知识点要点 | 题型</code>。</li>
+          <li><b>行数必须等于批次数</b>，多一少一都会报错。</li>
+          <li>可点「自动规划」让模型填写，也可手动写。</li>
+        </ul>
+        <p class="guide-title warn">⚠ 提示</p>
+        <ul>
+          <li>本页在独立浏览器标签页运行。生成期间<b>请勿关闭该标签页</b>，否则生成会中断。</li>
+          <li>已完成的批次<b>不会丢失</b>——每批完成即下载保存。</li>
+          <li>切换到其他标签页浏览不影响生成（页面仍在运行）。</li>
+        </ul>
+      </div>
+    </details>
+
+    <!-- ===== 1. 题库参数 ===== -->
+    <section class="card">
+      <h2>1. 题库参数 <span class="free-limit" id="freeLimitTip">免费版上限 30 题</span></h2>
+      <div class="grid">
+        <label>考试名称 *
+          <input id="examName" type="text" placeholder="如：注册会计师" />
+        </label>
+        <label>科目前缀
+          <input id="subjectId" type="text" value="0001" maxlength="4" />
+        </label>
+        <label>总题数
+          <input id="total" type="number" value="900" min="1" step="10" />
+        </label>
+        <label>每批题数
+          <input id="batchSize" type="number" value="150" min="1" step="5" />
+        </label>
+        <label>难度
+          <select id="level">
+            <option value="auto">不分级</option>
+            <option value="basic">初级</option>
+            <option value="advanced">中级</option>
+          </select>
+        </label>
+        <label>时政下限
+          <input id="affairsFloor" type="text" value="2025-06" placeholder="YYYY-MM" />
+        </label>
+      </div>
+      <label class="check">
+        <input id="hasAnalysis" type="checkbox" checked />
+        包含解析（每题附 解析：... 行）
+      </label>
+    </section>
+
+    <!-- ===== 1.5 参考文档（出题知识库） ===== -->
+    <section class="card">
+      <h2>1.5 参考文档（出题知识库）</h2>
+      <p class="hint">上传 <b>.txt / .md</b> 文件作为出题依据，模型将优先依据其内容出题（覆盖大纲、教材、资料等）。支持多文件，单文件过大将自动截断。</p>
+      <div class="grid">
+        <label class="span2">选择参考文档（可多选）
+          <input id="refDocInput" type="file" accept=".txt,.md,.markdown" multiple />
+        </label>
+      </div>
+      <div id="refDocList" class="ref-doc-list">
+        <p class="hint" style="margin:6px 0">尚未添加参考文档。</p>
+      </div>
+      <div class="actions">
+        <button id="clearRefDocs" class="btn ghost">清空</button>
+      </div>
+    </section>
+
+    <!-- ===== 2. API 配置 ===== -->
+    <section class="card">
+      <h2>2. 大模型 API</h2>
+      <div class="grid">
+        <label class="span2">API Base URL
+          <input id="baseUrl" type="text" placeholder="https://api.deepseek.com/v1" />
+        </label>
+        <label>模型名
+          <input id="model" type="text" placeholder="deepseek-chat" />
+        </label>
+        <label>API Key
+          <input id="apiKey" type="password" placeholder="sk-...（本地 Ollama 可随便填非空）" />
+        </label>
+        <label>Temperature
+          <input id="temperature" type="number" step="0.1" value="0.7" />
+        </label>
+        <label>Max Tokens
+          <input id="maxTokens" type="number" value="8192" min="256" step="256" />
+        </label>
+      </div>
+      <div class="actions">
+        <button id="testConn" class="btn ghost">测试连接</button>
+        <span id="testResult" class="test-result"></span>
+      </div>
+    </section>
+
+    <!-- ===== 3. 知识模块 ===== -->
+    <section class="card">
+      <h2>3. 知识模块规划</h2>
+      <p class="hint">可点「自动规划」让模型生成，也可手动按行填写。每行格式：<code>模块名 | 知识点要点 | 建议题型</code></p>
+      <textarea id="planArea" rows="8" placeholder="可留空，点下方「自动规划」生成，或手动填写：&#10;民法总论 | 民事法律关系、自然人、法人 | 单选、判断、简答&#10;合同法 | 合同成立、效力、违约责任 | 单选、多选、案例分析"></textarea>
+      <div class="actions">
+        <button id="autoPlan" class="btn ghost">自动规划</button>
+      </div>
+    </section>
+
+    <!-- ===== 4. 生成 ===== -->
+    <section class="card">
+      <h2>4. 生成与下载</h2>
+      <div class="actions">
+        <button id="startGenerate" class="btn primary">开始生成</button>
+        <button id="stopGenerate" class="btn danger" disabled>停止</button>
+        <label class="check inline">
+          <input id="autoSave" type="checkbox" checked />
+          每批生成后自动下载
+        </label>
+      </div>
+      <div id="progressWrap" class="progress-wrap hidden">
+        <div id="progressBar" class="progress-bar"></div>
+        <span id="progressText" class="progress-text"></span>
+      </div>
+      <div id="log" class="log"></div>
+      <div id="resultList" class="result-list"></div>
+    </section>
+  </main>
+
+  <aside class="contact-card" id="contactCard">
+    <div class="contact-title">获取 VIP 卡密</div>
+    <div class="contact-qrcode">
+      <img id="qrcodeImg" src="qrcode.jpg" alt="陆小马学习资料站公众号二维码" />
+    </div>
+    <div class="contact-name">陆小马学习资料站</div>
+    <p class="contact-tip">微信扫码关注公众号<br />回复「卡密」获取激活码</p>
+  </aside>
+
+  <footer class="app-footer">
+    配置会自动保存，下次打开自动恢复。本页为独立标签页，切换到其他标签页不影响生成。
+  </footer>
+
+  <script src="vip.js"></script>
+  <script src="popup.js"></script>
+</body>
+</html>

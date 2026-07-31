@@ -1,0 +1,24 @@
+{
+  "manifest_version": 3,
+  "name": "陆小马刷题题库生成器",
+  "version": "1.1.0",
+  "description": "批量生成高频易错题库：输入考试名称、题量与大模型 API 参数，自动规划知识模块、分批出题并保存 TXT 到本地。",
+  "action": {
+    "default_title": "陆小马刷题题库生成器",
+    "default_icon": {
+      "16": "icons/icon16.png",
+      "48": "icons/icon48.png",
+      "128": "icons/icon128.png"
+    }
+  },
+  "background": {
+    "service_worker": "background.js"
+  },
+  "icons": {
+    "16": "icons/icon16.png",
+    "48": "icons/icon48.png",
+    "128": "icons/icon128.png"
+  },
+  "permissions": ["storage", "downloads"],
+  "host_permissions": ["<all_urls>"]
+}
