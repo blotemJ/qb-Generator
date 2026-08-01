@@ -1,0 +1,42 @@
+name: Release Extension Zip
+
+on:
+  push:
+    tags:
+      - 'v*'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Determine version
+        id: ver
+        run: echo "version=${GITHUB_REF_NAME}" >> "$GITHUB_OUTPUT"
+
+      - name: Package extension (exclude .gitignored files)
+        run: |
+          VERSION="${{ steps.ver.outputs.version }}"
+          ZIP="qbank-browser-extension-${VERSION}.zip"
+          # 使用 git archive 打包当前 tag，自动遵循 .gitignore，不含未混淆明文备份
+          git archive --prefix=qbank-browser-extension/ "HEAD" -o "${ZIP}"
+          echo "zip=${ZIP}" >> "$GITHUB_OUTPUT"
+          ls -lh "${ZIP}"
+
+      - name: Create or update release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: qbank-browser-extension-${{ steps.ver.outputs.version }}.zip
+          draft: false
+          prerelease: false
+          generate_release_notes: true
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
