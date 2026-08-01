@@ -297,6 +297,21 @@ textarea::placeholder { color: #b0b6c6; }
   text-align: center;
 }
 
+/* ===== 使用协议声明 ===== */
+.eula-card {
+  margin: 14px 18px 0;
+  padding: 14px 18px;
+  background: #fff7f0;
+  border: 1px solid #f3d9bf;
+  border-left: 4px solid var(--primary);
+  border-radius: 10px;
+}
+.eula-title { margin: 0 0 8px; font-size: 15px; color: var(--primary); }
+.eula-text { margin: 0 0 8px; font-size: 13px; color: var(--text); }
+.eula-list { margin: 0; padding-left: 20px; }
+.eula-list li { font-size: 13px; line-height: 1.7; color: var(--text); margin-bottom: 6px; }
+.eula-list b { color: var(--danger); }
+
 /* ===== 右侧联系/二维码卡片 ===== */
 .contact-card {
   position: fixed;
